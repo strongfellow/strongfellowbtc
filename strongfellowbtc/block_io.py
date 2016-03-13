@@ -1,5 +1,4 @@
 
-
 import strongfellowbtc.hash
 from collections import namedtuple
 
@@ -30,3 +29,12 @@ def generate_blocks(stream):
             block = _read_exactly(stream, length)
             hash = _block_hash(block)
             yield BlockRead(network=network, block=block, hash=hash)
+
+def write_block(blk, stream):
+    network = blk.network
+    block = blk.block
+    stream.write(network)
+    bs = "".join( chr( (len(block) >> (i * 8)) & 0xff ) for i in range(4) )
+    length = bs
+    stream.write(length)
+    stream.write(block)
