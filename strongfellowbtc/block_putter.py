@@ -1,4 +1,5 @@
 
+import argparse
 import boto3
 import botocore
 import hashlib
@@ -7,9 +8,16 @@ import logging
 import strongfellowbtc.block_io as io
 import strongfellowbtc.hex as hex
 
-MAIN_NETWORK = 'f9beb4d9'
+def _args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--network', default='f9beb4d9')
+    return parser.parse_args(args)
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
+    args = _args(args)
     logging.basicConfig(level=logging.INFO)
     s3 = boto3.client('s3')
     BUCKET = 'strongfellow.com'
@@ -20,18 +28,19 @@ def main():
         'MISS_WRONG_MD5': 0,
         'PUT': 0
     }
+    
+    expected_network = args.network.decode('hex')
     for (network, block, h) in io.generate_blocks(sys.stdin):
         counters['N'] += 1
-        network = hex.little_endian_hex(network)
         h = hex.big_endian_hex(h)
 
-        if network != MAIN_NETWORK:
-            raise Exception('unexpected network: %s' % network)
+        if network != expected_network:
+            raise Exception('unexpected network: %s; expected %s' % (hex.little_endian_hex(network), hex.little_endian_hex(expected_network)))
         if not h.startswith('0000'):
             raise Exception('block hash %s doesnt have leading zeroes' % h)
 
         md5 = hex.little_endian_hex(hashlib.md5(block).digest())
-        print '%s\t%d\t%s\t%s' % (network, len(block), h, md5)
+        print '%s\t%d\t%s\t%s' % (hex.little_endian_hex(network), len(block), h, md5)
         key = 'blocks/%s' % h
         try:
             response = s3.head_object(Bucket=BUCKET, Key=key, IfMatch=md5)
@@ -55,6 +64,3 @@ def main():
                 raise
         logging.info('counters:\n' + "\n".join( '\t%s\t%d' % (k, v) for (k, v) in sorted(counters.items())))
     logging.info('SUCCESS')
-
-if __name__ == '__main__':
-    main()

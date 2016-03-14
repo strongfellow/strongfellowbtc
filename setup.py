@@ -9,7 +9,11 @@ config = {
     'version': '0.1',
     'install_requires': ['nose'],
     'packages': ['strongfellowbtc'],
-    'scripts': []
+    'entry_points': {
+        'console_scripts': [
+            'put_blocks=strongfellowbtc.block_putter:main'
+        ]
+    }
 }
 
 setup(**config)
