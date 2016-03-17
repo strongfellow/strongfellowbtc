@@ -11,7 +11,7 @@ import strongfellowbtc.block_putter
 def _args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--bucket', default='strongfellow.com')
-    parser.add_argument('--prefix', default='blocks2')
+    parser.add_argument('--prefix', default='blocks')
     return parser.parse_args(args)
 
 def stash_incoming_blocks(args=None):
