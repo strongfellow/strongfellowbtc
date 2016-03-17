@@ -5,7 +5,8 @@ import logging
 import os.path
 import sys
 import twitter
-import zmq
+
+import strongfellowbtc.zmq
 
 from datetime import datetime
 
