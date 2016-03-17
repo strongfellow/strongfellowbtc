@@ -11,7 +11,8 @@ config = {
     'packages': ['strongfellowbtc'],
     'entry_points': {
         'console_scripts': [
-            'put_blocks=strongfellowbtc.block_putter:main'
+            'put_blocks=strongfellowbtc.block_putter:main',
+            'tweet_blocks=strongfellowbtc.block_tweeter:main'
         ]
     }
 }
