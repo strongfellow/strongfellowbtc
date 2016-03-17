@@ -45,7 +45,7 @@ def main():
     with strongfellowbtc.zmq.socket(port=28332, topic=TOPIC) as socket:
         while True:
             topic, body = socket.recv_multipart()
-            now = datetime.utcnow()
+            now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
             block_hash = strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(body[:80]))
             message = TEMPLATE % (now, block_hash)
             tweet(t, message)
