@@ -47,3 +47,4 @@ def main():
                 block_hash = hex.big_endian_hex(hash.double_sha256(body[:80]))
                 message = TEMPLATE % (now, block_hash)
                 tweet(t, message)
+                sys.exit()
