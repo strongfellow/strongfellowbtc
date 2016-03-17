@@ -17,7 +17,7 @@ def _args(args):
 def stash_incoming_blocks(args=None):
     logging.basicConfig(level=logging.INFO)
     if args is None:
-        args = sys.argv[1]
+        args = sys.argv[1:]
 
     args = _args(args)
     logging.info('BEGIN')
