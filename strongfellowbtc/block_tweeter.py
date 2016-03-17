@@ -37,8 +37,8 @@ TOPIC = 'rawblock'
 TEMPLATE = 'Block Mined, %s: http://strongfellow.com/blocks/%s #bitcoin'
 
 def main():
-    logging.info('BEGIN')
     logging.basicConfig(level=logging.INFO)
+    logging.info('BEGIN')
 
     t = get_twitter()
 
