@@ -39,9 +39,7 @@ TEMPLATE = 'Block Mined, %s: http://strongfellow.com/blocks/%s #bitcoin'
 def main():
     logging.basicConfig(level=logging.INFO)
     logging.info('BEGIN')
-
     t = get_twitter()
-
     with strongfellowbtc.zmq.socket(port=28332, topic=TOPIC) as socket:
         while True:
             topic, body = socket.recv_multipart()
