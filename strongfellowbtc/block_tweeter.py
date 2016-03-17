@@ -33,8 +33,8 @@ def get_twitter():
     print t.VerifyCredentials()
     return t
 
-TOPIC = 'rawtx'
-TEMPLATE = 'Bitcoin Block Mined, %s: http://strongfellow.com/blocks/%s #btc #bitcoin'
+TOPIC = 'rawblock'
+TEMPLATE = 'Block Mined, %s: http://strongfellow.com/blocks/%s #bitcoin'
 
 def main():
     logging.info('BEGIN')
@@ -46,8 +46,6 @@ def main():
         while True:
             topic, body = socket.recv_multipart()
             now = datetime.utcnow()
-            if topic == TOPIC:
-                block_hash = strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(body[:80]))
-                message = TEMPLATE % (now, block_hash)
-                tweet(t, message)
-                sys.exit()
+            block_hash = strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(body[:80]))
+            message = TEMPLATE % (now, block_hash)
+            tweet(t, message)
