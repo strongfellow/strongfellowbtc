@@ -7,8 +7,8 @@ import sys
 import twitter
 
 import strongfellowbtc.zmq
-import strongfellow.hex
-import strongfellow.hash
+import strongfellowbtc.hex
+import strongfellowbtc.hash
 
 from datetime import datetime
 
