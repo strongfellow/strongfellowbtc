@@ -1,6 +1,7 @@
 
 import argparse
 import logging
+import sys
 
 import strongfellowbtc.hash
 import strongfellowbtc.hex
