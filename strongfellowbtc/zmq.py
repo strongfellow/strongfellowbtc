@@ -9,7 +9,7 @@ class socket():
 
 
     def __enter__(self):
-        socket = self._.socket(zmq.SUB)
+        socket = self._context.socket(zmq.SUB)
         socket.setsockopt(zmq.SUBSCRIBE, topic)
         socket.connect("tcp://127.0.0.1:%i" % port)
         return socket
