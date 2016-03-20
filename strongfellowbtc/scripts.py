@@ -106,7 +106,7 @@ def stash_incoming_transactions(args=None):
         with strongfellowbtc.zmq.socket(port=args.txport, topic='rawtx') as socket:
             while True:
                 topic, tx = socket.recv_multipart()
-                delta = datetime.datetime.now() - datetime.datetime(1970, 1, 1)
+                delta = datetime.now() - datetime(1970, 1, 1)
                 ms = long(delta.total_seconds() * 1000)
                 try:
                     q.put((ms, tx))
