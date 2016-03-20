@@ -97,18 +97,31 @@ def stash_incoming_transactions(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--maxsize', type=int, default='100')
+    parser.add_argumet('--txport', type=int, default='28332')
     args = parser.parse_args(args)
-
 
     q = Queue.Queue(maxsize=args.maxsize)
 
     def produce(q):
-        time.sleep(3)
-        logging.info('producer was called')
+        with strongfellow.zmq.socket(port=args.txport, topic='rawtx') as socket:
+            while True:
+                topic, tx = socket.recv_multipart()
+                delta = datetime.datetime.now() - datetime.datetime(1970, 1, 1)
+                ms = long(delta.total_seconds() * 1000)
+                try:
+                    q.put((ms, tx))
+                except Queue.Full:
+                    logging.exception('we cant put %s' % strongfellowbtc.hex(hash))
+
 
     def consume(q):
-        time.sleep(5)
-        logging.info('consumer was called')
+        while True:
+            items = []
+            while len(items) < 25 and not q.empty():
+                ms, tx = q.get()
+                items.append(q.get())
+                hash = strongfellowbtc.hash(double_sha256(tx))
+                logging.info('were going to put %s' % strongfellowbtc.hex(hash))
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
