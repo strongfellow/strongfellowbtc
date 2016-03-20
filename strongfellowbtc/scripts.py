@@ -125,7 +125,7 @@ def stash_incoming_transactions(args=None):
                     'PutRequest': {
                         'Item': {
                             'txhash': { 'B': hash },
-                            'created': { 'N': ms },
+                            'created': { 'N': str(ms) },
                             'tx': { 'B': tx }
                         }
                     }
