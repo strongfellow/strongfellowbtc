@@ -111,7 +111,7 @@ def stash_incoming_transactions(args=None):
                 try:
                     q.put_nowait((ms, tx))
                 except Queue.Full:
-                    logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(hash))
+                    logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(tx)))
 
 
     def consume(q):
@@ -134,7 +134,7 @@ def stash_incoming_transactions(args=None):
                 items.append(put_request)
                 logging.info('were going to put %s' % strongfellowbtc.hex.big_endian_hex(hash))
 
-                table_name = 'doesnt-exist'
+                table_name = 'tx-us-west-2-dev-laptop-2016-03-20T00'
                 response = client.batch_write_item(
                     RequestItems={
                         table_name: items
@@ -142,9 +142,6 @@ def stash_incoming_transactions(args=None):
                     ReturnConsumedCapacity='TOTAL',
                     ReturnItemCollectionMetrics='SIZE')
                 print response
-                sys.exit()
-
-
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
