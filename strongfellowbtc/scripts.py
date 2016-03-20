@@ -4,6 +4,9 @@ import boto3
 from datetime import datetime, timedelta
 import logging
 import sys
+import time
+import threading
+import Queue
 
 import strongfellowbtc.hash
 import strongfellowbtc.hex
@@ -29,8 +32,6 @@ def stash_incoming_blocks(args=None):
         while True:
             topic, block = socket.recv_multipart()
             putter.put_block(block)
-
-
 
 date_format = '%Y-%m-%dT%H'
 def _cta_args(args):
@@ -89,11 +90,31 @@ def create_transactions_table(args=None):
 
 
 def stash_incoming_transactions(args=None):
+
     logging.basicConfig(level=logging.INFO)
     if args is None:
         args = sys.argv[1:]
-    
-    with strongfellow.zmq.socket(port=args.port, topic='rawtx') as socket:
-        while True:
-            topic, tx = socket.recv_multipart()
-            
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--maxsize', type=int, default='100')
+    args = parser.parse_args(args)
+
+
+    q = Queue.Queue(maxsize=args.maxsize)
+
+    def produce(q):
+        time.sleep(3)
+        logging.info('producer was called')
+
+    def consume(q):
+        time.sleep(5)
+        logging.info('consumer was called')
+
+    t1 = threading.Thread(target=produce, args=(q,))
+    t2 = threading.Thread(target=consume, args=(q,))
+
+    t1.start()
+    t2.start()
+    logging.info('join us, wont you?')
+    t1.join()
+    t2.join()
