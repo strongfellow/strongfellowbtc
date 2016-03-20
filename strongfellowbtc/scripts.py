@@ -1,5 +1,7 @@
 
 import argparse
+import boto3
+from datetime import datetime, timedelta
 import logging
 import sys
 
@@ -27,3 +29,71 @@ def stash_incoming_blocks(args=None):
         while True:
             topic, block = socket.recv_multipart()
             putter.put_block(block)
+
+
+
+date_format = '%Y-%m-%dT%H'
+def _cta_args(args):
+    default_date_time = (datetime.utcnow() + timedelta(hours=3)).replace(hour=0, minute=0, microsecond=0).strftime(date_format)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', required=True)
+    parser.add_argument('--region', required=True)
+    parser.add_argument('--env', required=True)
+    parser.add_argument('--rcu', default=10, type=int)
+    parser.add_argument('--wcu', default=10, type=int)
+    parser.add_argument('--date', default=default_date_time, type=_valid_date)
+    return parser.parse_args(args)
+
+def _valid_date(s):
+    try:
+        return datetime.strptime(s, date_format).strftime(date_format)
+    except ValueError:
+        raise argparse.ArgumentTypeError('Not a valid date: "{0}".'.format(s))
+
+def create_transactions_table(args=None):
+    logging.basicConfig(level=logging.INFO)
+    if args is None:
+        args = sys.argv[1:]
+    args = _cta_args(args)
+
+    table_name = 'tx-{region}-{env}-{host}-{date}'.format(
+        host=args.host, region=args.region, env=args.env, date=args.date)
+
+    logging.info('creating table {}', table_name)
+
+    client = boto3.client('dynamodb')
+    table = client.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {
+                'AttributeName': 'txhash',
+                'KeyType': 'HASH' # Partition Key
+            },
+            {
+                'AttributeName': 'created',
+                'KeyType': 'RANGE' # Partition Key
+            },
+        ],
+        AttributeDefinitions=[
+            { 'AttributeName': 'txhash',  'AttributeType': 'B'},
+            { 'AttributeName': 'created', 'AttributeType': 'N' }
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': args.rcu,
+            'WriteCapacityUnits': args.wcu
+        }
+    )
+    logging.info('created table {}', table_name)
+
+    logging.info("Table status: {}", table)
+
+
+def stash_incoming_transactions(args=None):
+    logging.basicConfig(level=logging.INFO)
+    if args is None:
+        args = sys.argv[1:]
+    
+    with strongfellow.zmq.socket(port=args.port, topic='rawtx') as socket:
+        while True:
+            topic, tx = socket.recv_multipart()
+            
