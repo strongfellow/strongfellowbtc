@@ -120,7 +120,7 @@ def stash_incoming_transactions(args=None):
             while len(items) < 25 and not q.empty():
                 ms, tx = q.get()
                 items.append(q.get())
-                hash = strongfellowbtc.hash(strongfellowbtc.hash.double_sha256(tx))
+                hash = strongfellowbtc.hash.double_sha256(tx)
                 logging.info('were going to put %s' % strongfellowbtc.hex(hash))
 
     t1 = threading.Thread(target=produce, args=(q,))
