@@ -109,7 +109,7 @@ def stash_incoming_transactions(args=None):
                 delta = datetime.now() - datetime(1970, 1, 1)
                 ms = long(delta.total_seconds() * 1000)
                 try:
-                    q.put((ms, tx))
+                    q.put_nowait((ms, tx))
                 except Queue.Full:
                     logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(hash))
 
