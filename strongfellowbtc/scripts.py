@@ -115,13 +115,36 @@ def stash_incoming_transactions(args=None):
 
 
     def consume(q):
+        client = boto3.client('dynamodb')
         while True:
             items = []
             while len(items) < 25 and not q.empty():
-                ms, tx = q.get()
-                items.append(q.get())
+                ms, tx = q.get_nowait()
                 hash = strongfellowbtc.hash.double_sha256(tx)
+                put_request = {
+                    'PutRequest': {
+                        'Item': {
+                            'txhash': { 'B': hash },
+                            'created': { 'N': ms },
+                            'tx': { 'B': tx }
+                        }
+                    }
+                }
+
+                items.append(put_request)
                 logging.info('were going to put %s' % strongfellowbtc.hex.big_endian_hex(hash))
+
+                table_name = 'doesnt-exist'
+                response = client.batch_write_item(
+                    RequestItems={
+                        table_name: items
+                    },
+                    ReturnConsumedCapacity='TOTAL',
+                    ReturnItemCollectionMetrics='SIZE')
+                print response
+                sys.exit()
+
+
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
