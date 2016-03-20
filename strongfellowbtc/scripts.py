@@ -97,7 +97,7 @@ def stash_incoming_transactions(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--maxsize', type=int, default='100')
-    parser.add_argumet('--txport', type=int, default='28332')
+    parser.add_argument('--txport', type=int, default='28332')
     args = parser.parse_args(args)
 
     q = Queue.Queue(maxsize=args.maxsize)
