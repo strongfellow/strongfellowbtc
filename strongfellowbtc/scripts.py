@@ -111,7 +111,7 @@ def stash_incoming_transactions(args=None):
                 try:
                     q.put((ms, tx))
                 except Queue.Full:
-                    logging.exception('we cant put %s' % strongfellowbtc.hex(hash))
+                    logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(hash))
 
 
     def consume(q):
@@ -121,7 +121,7 @@ def stash_incoming_transactions(args=None):
                 ms, tx = q.get()
                 items.append(q.get())
                 hash = strongfellowbtc.hash.double_sha256(tx)
-                logging.info('were going to put %s' % strongfellowbtc.hex(hash))
+                logging.info('were going to put %s' % strongfellowbtc.hex.big_endian_hex(hash))
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
