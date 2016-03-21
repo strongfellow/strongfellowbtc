@@ -113,8 +113,8 @@ def stash_incoming_transactions(args=None):
                 except Queue.Full:
                     logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(tx)))
 
-
     def consume(q):
+        table_name = 'tx-us-west-2-dev-laptop-2016-03-20T00'
         client = boto3.client('dynamodb')
         while True:
             items = []
@@ -134,14 +134,13 @@ def stash_incoming_transactions(args=None):
                 items.append(put_request)
                 logging.info('were going to put %s' % strongfellowbtc.hex.big_endian_hex(hash))
 
-                table_name = 'tx-us-west-2-dev-laptop-2016-03-20T00'
-                response = client.batch_write_item(
-                    RequestItems={
-                        table_name: items
-                    },
-                    ReturnConsumedCapacity='TOTAL',
-                    ReturnItemCollectionMetrics='SIZE')
-                print response
+            response = client.batch_write_item(
+                RequestItems={
+                    table_name: items
+                },
+                ReturnConsumedCapacity='TOTAL',
+                ReturnItemCollectionMetrics='SIZE')
+            print response
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
