@@ -169,7 +169,7 @@ def stash_incoming_transactions(args=None):
                         wcu_carry = wcu
                         break
                     else:
-                        items.append(put_request)
+                        items.append(item)
                         wcu_sum += wcu
                         carry = []
                         wcu_carry = 0
