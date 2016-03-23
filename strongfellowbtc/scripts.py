@@ -175,7 +175,7 @@ def stash_incoming_transactions(args=None):
                     }
                     wcu = _wcu(item)
                     logging.info('adding wcu %d to wcu_sum %d', wcu, wcu_sum)
-                    if wcu_sum + wcu > 25:
+                    if items and wcu_sum + wcu > 25: # we check for items to make sure we always add at least 1
                         carry = [item]
                         wcu_carry = wcu
                         break
