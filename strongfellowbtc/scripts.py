@@ -1,7 +1,9 @@
 
 import argparse
 import boto3
+
 from datetime import datetime, timedelta
+from operator import truediv
 import logging
 import math
 import sys
@@ -131,7 +133,7 @@ def stash_incoming_transactions(args=None):
                 size += len(k)
                 for _, payload in v.iteritems():
                     size += len(payload)
-            wcu = int(math.ceil(size / 1000))
+            wcu = int(math.ceil(truediv(size, 1000)))
             return wcu
 
         def _post(items):
