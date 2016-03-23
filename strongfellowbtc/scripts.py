@@ -131,7 +131,8 @@ def stash_incoming_transactions(args=None):
                 size += len(k)
                 for _, payload in v.iteritems():
                     size += len(payload)
-            return math.ceil(size / 1000)
+            wcu = int(math.ceil(size / 1000))
+            return wcu
 
         def _post(items):
             table_name = 'tx-us-west-2-dev-giraffe-2016-03-23T00'
@@ -150,6 +151,7 @@ def stash_incoming_transactions(args=None):
         while True:
             items = carry
             wcu_sum = wcu_carry
+            logging.info('starting with wcu %d', wcu_sum)
             if q.empty():
                time.sleep(1)
                logging.info('no transactions, sleeping for a second')
@@ -164,6 +166,7 @@ def stash_incoming_transactions(args=None):
                         'tx': { 'B': tx }
                     }
                     wcu = _wcu(item)
+                    logging.info('adding wcu %d to wcu_sum %d', wcu, wcu_sum)
                     if wcu_sum + wcu > 25:
                         carry = [item]
                         wcu_carry = wcu
