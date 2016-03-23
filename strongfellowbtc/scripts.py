@@ -128,7 +128,7 @@ def stash_incoming_transactions(args=None):
             size = 0
             for k,v in item.iteritems():
                 size += len(k)
-                for _, payload in v:
+                for _, payload in v.iteritems():
                     size += len(payload)
             return math.ceil(size / 1000)
 
