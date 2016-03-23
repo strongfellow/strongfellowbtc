@@ -33,9 +33,17 @@ def stash_incoming_blocks(args=None):
             topic, block = socket.recv_multipart()
             putter.put_block(block)
 
+def table_time(dt=None, tables_per_day=1, lead_time=2):
+    if dt is None:
+        dt = datetime.utcnow()
+    dt = dt.replace(hour=dt.hour + lead_time)
+    new_hour = ((dt.hour * tables_per_day) / 24) * (24 / tables_per_day)
+    dt = dt.replace(hour=new_hour, minute=0, second=0, microsecond=0)
+    return dt
+
 date_format = '%Y-%m-%dT%H'
 def _cta_args(args):
-    default_date_time = (datetime.utcnow() + timedelta(hours=3)).replace(hour=0, minute=0, microsecond=0).strftime(date_format)
+    default_date_time = table_time().strftime(date_format)
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', required=True)
     parser.add_argument('--region', required=True)
