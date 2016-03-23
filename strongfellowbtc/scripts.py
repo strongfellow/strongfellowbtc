@@ -132,16 +132,6 @@ def stash_incoming_transactions(args=None):
 
     def consume(q):
         client = boto3.client('dynamodb')
-        items = []
-        def _wcu(item):
-            size = 0
-            for k,v in item.iteritems():
-                size += len(k)
-                for _, payload in v.iteritems():
-                    size += len(payload)
-            wcu = int(math.ceil(truediv(size, 1000)))
-            return wcu
-
         def _post(items):
             table_name = 'tx-us-west-2-dev-giraffe-2016-03-23T00'
             logging.info('putting %d items to table %s', len(items), table_name)
@@ -151,41 +141,26 @@ def stash_incoming_transactions(args=None):
                 },
                 ReturnConsumedCapacity='TOTAL',
                 ReturnItemCollectionMetrics='SIZE')
-            print response
+            logging.info(response)
             logging.info('SUCCESS putting %d items to table %s', len(items), table_name)
 
-        wcu_carry = 0
-        carry = []
         while True:
-            items = carry
-            wcu_sum = wcu_carry
-            logging.info('starting with wcu %d', wcu_sum)
+            items = []
             if q.empty():
                time.sleep(1)
                logging.info('no transactions, sleeping for a second')
             else:
                 n = q.qsize()
                 logging.info('%d transactions equeued', n)
-                while len(items) < n:
+                while len(items) < n and len(items) < 25:
                     ms, tx = q.get_nowait()
                     item = {
                         'txhash': { 'B': strongfellowbtc.hash.double_sha256(tx) },
                         'created': { 'N': str(ms) },
                         'tx': { 'B': tx }
                     }
-                    wcu = _wcu(item)
-                    logging.info('adding wcu %d to wcu_sum %d', wcu, wcu_sum)
-                    if items and wcu_sum + wcu > 25: # we check for items to make sure we always add at least 1
-                        carry = [item]
-                        wcu_carry = wcu
-                        break
-                    else:
-                        items.append(item)
-                        wcu_sum += wcu
-                        carry = []
-                        wcu_carry = 0
+                    items.append(item)
                 _post(items)
-
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
