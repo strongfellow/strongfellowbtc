@@ -16,6 +16,12 @@ import strongfellowbtc.hex
 import strongfellowbtc.zmq
 import strongfellowbtc.block_putter
 
+
+def _configure_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 def _args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--bucket', default='strongfellow.com')
@@ -23,7 +29,7 @@ def _args(args):
     return parser.parse_args(args)
 
 def stash_incoming_blocks(args=None):
-    logging.basicConfig(level=logging.INFO)
+    _configure_logging()
     if args is None:
         args = sys.argv[1:]
 
@@ -63,7 +69,7 @@ def _valid_date(s):
         raise argparse.ArgumentTypeError('Not a valid date: "{0}".'.format(s))
 
 def create_transactions_table(args=None):
-    logging.basicConfig(level=logging.INFO)
+    _configure_logging()
     if args is None:
         args = sys.argv[1:]
     args = _cta_args(args)
@@ -102,7 +108,7 @@ def create_transactions_table(args=None):
 
 def stash_incoming_transactions(args=None):
 
-    logging.basicConfig(level=logging.INFO)
+    _configure_logging()
     if args is None:
         args = sys.argv[1:]
 
