@@ -1,7 +1,7 @@
 
 import argparse
 import boto3
-
+from collections import namedtuple
 from datetime import datetime, timedelta
 from operator import truediv
 import logging
@@ -16,13 +16,34 @@ import strongfellowbtc.hex
 import strongfellowbtc.zmq
 import strongfellowbtc.block_putter
 
+TableSpecs = namedtuple('TableSpecs', ['rcu', 'wcu', 'name'])
+
+def _table_specs(args):
+    def _valid_date(s):
+        date_format = '%Y-%m-%dT%H'
+        try:
+            return datetime.strptime(s, date_format).strftime(date_format)
+        except ValueError:
+            raise argparse.ArgumentTypeError('Not a valid date: "{0}".'.format(s))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--region', required=True)
+    parser.add_argument('--env', required=True)
+    parser.add_argument('--host', required=True)
+    parser.add_argument('--date', required=True, type=_valid_date)
+    parser.add_argument('--rcu', default=10, type=int)
+    parser.add_argument('--wcu', default=10, type=int)
+    vs = parser.parse_args(args)
+    name = 'tx-{region}-{env}-{host}-{date}'.format(
+        region=vs.region, env=vs.env, host=vs.host, date=vs.date)
+    return TableSpecs(rcu=vs.rcu, wcu=vs.wcu, name=name)
 
 def _configure_logging():
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-def _args(args):
+def _s3_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--bucket', default='strongfellow.com')
     parser.add_argument('--prefix', default='blocks')
@@ -33,7 +54,7 @@ def stash_incoming_blocks(args=None):
     if args is None:
         args = sys.argv[1:]
 
-    args = _args(args)
+    args = _s3_args(args)
     logging.info('BEGIN')
 
     putter = strongfellowbtc.block_putter.BlockPutter(bucket=args.bucket, prefix=args.prefix)
@@ -42,46 +63,31 @@ def stash_incoming_blocks(args=None):
             topic, block = socket.recv_multipart()
             putter.put_block(block)
 
-def table_time(dt=None, tables_per_day=1, lead_time=2):
-    if dt is None:
-        dt = datetime.utcnow()
-    dt = dt.replace(hour=dt.hour + lead_time)
-    new_hour = ((dt.hour * tables_per_day) / 24) * (24 / tables_per_day)
-    dt = dt.replace(hour=new_hour, minute=0, second=0, microsecond=0)
-    return dt
-
-date_format = '%Y-%m-%dT%H'
-def _cta_args(args):
-    default_date_time = table_time().strftime(date_format)
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--host', required=True)
-    parser.add_argument('--region', required=True)
-    parser.add_argument('--env', required=True)
-    parser.add_argument('--rcu', default=10, type=int)
-    parser.add_argument('--wcu', default=10, type=int)
-    parser.add_argument('--date', default=default_date_time, type=_valid_date)
-    return parser.parse_args(args)
-
-def _valid_date(s):
-    try:
-        return datetime.strptime(s, date_format).strftime(date_format)
-    except ValueError:
-        raise argparse.ArgumentTypeError('Not a valid date: "{0}".'.format(s))
+#
+# delete-tx-table --region us-west-2 --env dev --host giraffe --date 2016-03-24T00
+#
+def delete_transactions_table(args=None):
+    _configure_logging()
+    if args is None:
+        args = sys.argv[1:]
+    table_specs = _table_specs(args)
+    client = boto3.client('dynamodb')
+    logging.info('deleting table %s', table_specs.name)
+    response = client.delete_table(
+        TableName=table_specs.name
+    )
+    logging.info('delete response: %s', response)
+    logging.info('SUCCESS deleting table %s', table_specs.name)
 
 def create_transactions_table(args=None):
     _configure_logging()
     if args is None:
         args = sys.argv[1:]
-    args = _cta_args(args)
-
-    table_name = 'tx-{region}-{env}-{host}-{date}'.format(
-        host=args.host, region=args.region, env=args.env, date=args.date)
-
-    logging.info('creating table %s', table_name)
+    table_specs = _table_specs(args)
 
     client = boto3.client('dynamodb')
-    table = client.create_table(
-        TableName=table_name,
+    response = client.create_table(
+        TableName=specs.name,
         KeySchema=[
             {
                 'AttributeName': 'txhash',
@@ -97,14 +103,12 @@ def create_transactions_table(args=None):
             { 'AttributeName': 'created', 'AttributeType': 'N' }
         ],
         ProvisionedThroughput={
-            'ReadCapacityUnits': args.rcu,
-            'WriteCapacityUnits': args.wcu
+            'ReadCapacityUnits': specs.rcu,
+            'WriteCapacityUnits': specs.wcu
         }
     )
-    logging.info('created table %s', table_name)
-
-    logging.info("Table status: %s", table)
-
+    logging.info('created table %s', specs.name)
+    logging.info("table status: %s", response)
 
 def stash_incoming_transactions(args=None):
 
