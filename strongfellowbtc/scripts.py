@@ -164,7 +164,11 @@ def stash_incoming_transactions(args=None):
                         'tx': { 'B': tx }
                     }
                     items.append(item)
-                _post(items)
+                try:
+                    _post(items)
+                except:
+                    logging.exception('problem posting items')
+                    time.sleep(3)
 
     t1 = threading.Thread(target=produce, args=(q,))
     t2 = threading.Thread(target=consume, args=(q,))
