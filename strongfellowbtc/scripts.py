@@ -83,7 +83,7 @@ def create_transactions_table(args=None):
     _configure_logging()
     if args is None:
         args = sys.argv[1:]
-    table_specs = _table_specs(args)
+    specs = _table_specs(args)
 
     client = boto3.client('dynamodb')
     response = client.create_table(
