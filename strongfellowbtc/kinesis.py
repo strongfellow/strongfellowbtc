@@ -5,7 +5,9 @@ import argparse
 from datetime import datetime
 import boto3
 import logging
+import Queue
 import sys
+import threading
 import uuid
 
 import strongfellowbtc.hex
