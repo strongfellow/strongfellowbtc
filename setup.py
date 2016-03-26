@@ -16,6 +16,7 @@ config = {
             'tweet_blocks=strongfellowbtc.block_tweeter:main',
             'stash-incoming-blocks=strongfellowbtc.scripts:stash_incoming_blocks',
             'stash-incoming-transactions=strongfellowbtc.scripts:stash_incoming_transactions',
+            'stream-incoming-transactions=strongfellowbtc.kinesis:stream_incoming_transactions',
             'create-tx-table=strongfellowbtc.scripts:create_transactions_table',
             'delete-tx-table=strongfellowbtc.scripts:delete_transactions_table'
         ]
