@@ -11,6 +11,7 @@ config = {
     'packages': ['strongfellowbtc'],
     'entry_points': {
         'console_scripts': [
+            'create-kinesis-stream=strongfellowbtc.kinesis:create_stream',
             'put_blocks=strongfellowbtc.block_putter:main',
             'tweet_blocks=strongfellowbtc.block_tweeter:main',
             'stash-incoming-blocks=strongfellowbtc.scripts:stash_incoming_blocks',

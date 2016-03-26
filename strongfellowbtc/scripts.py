@@ -11,6 +11,7 @@ import time
 import threading
 import Queue
 
+from strongfellowbtc.logging import configure_logging
 import strongfellowbtc.hash
 import strongfellowbtc.hex
 import strongfellowbtc.zmq
@@ -38,11 +39,6 @@ def _table_specs(args):
         region=vs.region, env=vs.env, host=vs.host, date=vs.date)
     return TableSpecs(rcu=vs.rcu, wcu=vs.wcu, name=name)
 
-def _configure_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
 def _s3_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--bucket', default='strongfellow.com')
@@ -50,7 +46,7 @@ def _s3_args(args):
     return parser.parse_args(args)
 
 def stash_incoming_blocks(args=None):
-    _configure_logging()
+    configure_logging()
     if args is None:
         args = sys.argv[1:]
 
@@ -67,7 +63,7 @@ def stash_incoming_blocks(args=None):
 # delete-tx-table --region us-west-2 --env dev --host giraffe --date 2016-03-24T00
 #
 def delete_transactions_table(args=None):
-    _configure_logging()
+    configure_logging()
     if args is None:
         args = sys.argv[1:]
     table_specs = _table_specs(args)
@@ -80,7 +76,7 @@ def delete_transactions_table(args=None):
     logging.info('SUCCESS deleting table %s', table_specs.name)
 
 def create_transactions_table(args=None):
-    _configure_logging()
+    configure_logging()
     if args is None:
         args = sys.argv[1:]
     specs = _table_specs(args)
@@ -111,7 +107,7 @@ def create_transactions_table(args=None):
     logging.info("table status: %s", response)
 
 def stash_incoming_transactions(args=None):
-    _configure_logging()
+    configure_logging()
     if args is None:
         args = sys.argv[1:]
 
