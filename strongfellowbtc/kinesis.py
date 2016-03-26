@@ -100,6 +100,7 @@ def stream_incoming_transactions(args=None):
                         Records=records,
                         StreamName=stream_name
                     )
+                    logging.info('response was: %s', response)
                     logging.info('SUCCESS putting records')
                 except:
                     logging.exception('problem putting records')
