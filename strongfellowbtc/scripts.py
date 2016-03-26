@@ -16,13 +16,13 @@ import strongfellowbtc.hex
 import strongfellowbtc.zmq
 import strongfellowbtc.block_putter
 
+_date_format = '%Y-%m-%dT%H'
 TableSpecs = namedtuple('TableSpecs', ['rcu', 'wcu', 'name'])
 
 def _table_specs(args):
     def _valid_date(s):
-        date_format = '%Y-%m-%dT%H'
         try:
-            return datetime.strptime(s, date_format).strftime(date_format)
+            return datetime.strptime(s, _date_format).strftime(_date_format)
         except ValueError:
             raise argparse.ArgumentTypeError('Not a valid date: "{0}".'.format(s))
 
@@ -111,7 +111,6 @@ def create_transactions_table(args=None):
     logging.info("table status: %s", response)
 
 def stash_incoming_transactions(args=None):
-
     _configure_logging()
     if args is None:
         args = sys.argv[1:]
@@ -119,7 +118,11 @@ def stash_incoming_transactions(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--maxsize', type=int, default='100')
     parser.add_argument('--txport', type=int, default='28332')
+    parser.add_argument('--region', required=True)
+    parser.add_argument('--env', required=True)
+    parser.add_argument('--host', required=True)
     args = parser.parse_args(args)
+
 
     q = Queue.Queue(maxsize=args.maxsize)
 
@@ -137,7 +140,8 @@ def stash_incoming_transactions(args=None):
     def consume(q):
         client = boto3.client('dynamodb')
         def _post(items):
-            table_name = 'tx-us-west-2-dev-giraffe-2016-03-23T00'
+            hour = datetime.utcnow().replace(minute=0, second=0, microsecond=0).strftime(_date_format)
+            table_name = 'tx-{region}-{env}-{host}-{date}'.format(region=args.regions, env=args.env, host=env.host, date=hour)
             logging.info('putting %d items to table %s', len(items), table_name)
             response = client.batch_write_item(
                 RequestItems={
