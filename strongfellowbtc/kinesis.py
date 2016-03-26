@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 import argparse
 from datetime import datetime
 import boto3
@@ -12,7 +14,7 @@ import strongfellowbtc.zmq
 from strongfellowbtc.logging import configure_logging
 
 def _stream_name(region, env, host):
-    return 'strongfellow-{region}-{env}-{host}'.format(region, env, host)    
+    return 'strongfellow-{region}-{env}-{host}'.format(region=region, env=env, host=host)
 
 def little_endian_long(n):
     bs = bytearray(8)
@@ -87,7 +89,7 @@ def stream_incoming_transactions(args=None):
                     ms, tx = q.get_nowait()
                     record = {
                         'Data': little_endian_long(ms) + tx,
-                        'PartitionKey' = str(uuid.uuid4())
+                        'PartitionKey': str(uuid.uuid4())
                     }
                     records.append(record)
                 try:
