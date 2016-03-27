@@ -16,6 +16,9 @@ import strongfellowbtc.hash
 import strongfellowbtc.zmq
 from strongfellowbtc.logging import configure_logging
 
+def k():
+    return boto3.client('kinesis')
+
 def _stream_name(region, env, host):
     return 'strongfellow-{region}-{env}-{host}'.format(region=region, env=env, host=host)
 
@@ -39,7 +42,7 @@ def create_stream(args=None):
     parser.add_argument('--shard-count', default='1', type=int)
     params = parser.parse_args(args)
 
-    kinesis = boto3.client('kinesis')
+    kinesis = k()
 
     stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
     shard_count = params.shard_count
@@ -78,7 +81,7 @@ def stream_incoming_transactions(args=None):
                     logging.exception('Queue is Full: we cant put %s' % strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(tx)))
 
     def consume(q):
-        kinesis = boto3.client('kinesis')
+        kinesis = k()
         stream_name = _stream_name(region=args.region, env=args.env, host=args.host)
         while True:
             if q.empty():
@@ -114,3 +117,24 @@ def stream_incoming_transactions(args=None):
     logging.info('join us, wont you?')
     t1.join()
     t2.join()
+
+def test_get_records(args = None):
+    configure_logging()
+    if args is None:
+        args = sys.argv[1:]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--region', required=True)
+    parser.add_argument('--env', required=True)
+    parser.add_argument('--host', required=True)
+    params = parser.parse_args(args)
+    
+    kinesis = k()
+    stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
+    shard_id = 'shardId-000000000000'
+    shard_iterator = kinesis.get_shard_iterator(StreamName=stream_name, ShardId=shard_id, ShardIteratorType="LATEST")['ShardIterator']
+    while True:
+        response = kinesis.get_records(ShardIterator=shard_iterator, Limit=1000)
+        shard_iterator = response['NextShardIterator']
+        print response
+        time.sleep(1)
+
