@@ -6,7 +6,7 @@ import hashlib
 import sys
 import logging
 import strongfellowbtc.block_io as io
-import strongfellowbtc.hash
+from strongfellowbtc.protocol import ds256
 import strongfellowbtc.hex
 
 class BlockPutter:
@@ -25,7 +25,7 @@ class BlockPutter:
     def put_block(self, block):
         self._counters['N'] += 1
         md5 = strongfellowbtc.hex.little_endian_hex(hashlib.md5(block).digest())
-        block_hash = strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(block[:80]))
+        block_hash = strongfellowbtc.hex.big_endian_hex(ds256(block[:80]))
         if not block_hash.startswith('0000'):
             raise Exception('block hash %s doesnt have leading zeroes' % h)
         key = '%s/%s' % (self._prefix, block_hash)

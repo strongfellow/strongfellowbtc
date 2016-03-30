@@ -1,5 +1,5 @@
 
-import strongfellowbtc.hash
+from strongfellowbtc.protocol import ds256
 from collections import namedtuple
 
 BlockRead = namedtuple('BlockRead', ['network', 'block', 'hash'])
@@ -15,7 +15,7 @@ def _little_endian(input, n):
     return sum(ord(b) << (i * 8) for i, b in enumerate(bs)) 
 
 def _block_hash(bs):
-    return strongfellowbtc.hash.double_sha256(bs[:80])
+    return ds256(bs[:80])
 
 def generate_blocks(stream):
     while True:

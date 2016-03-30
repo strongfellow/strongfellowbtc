@@ -8,7 +8,7 @@ import twitter
 
 import strongfellowbtc.zmq
 import strongfellowbtc.hex
-import strongfellowbtc.hash
+from strongfellowbtc.protocol import ds256
 
 from datetime import datetime
 
@@ -44,6 +44,6 @@ def main():
         while True:
             topic, body = socket.recv_multipart()
             now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
-            block_hash = strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(body[:80]))
+            block_hash = strongfellowbtc.hex.big_endian_hex(ds256(body[:80]))
             message = TEMPLATE % (now, block_hash)
             tweet(t, message)

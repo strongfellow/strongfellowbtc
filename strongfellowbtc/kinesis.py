@@ -12,7 +12,7 @@ import threading
 import uuid
 
 import strongfellowbtc.hex
-import strongfellowbtc.hash
+from strongfellowbtc.protocol import ds256
 import strongfellowbtc.zmq
 from strongfellowbtc.logging import configure_logging
 
@@ -78,7 +78,7 @@ def stream_incoming_transactions(args=None):
                 try:
                     q.put_nowait((ms, tx))
                 except Queue.Full:
-                    logging.exception('Queue is Full: we cant put %s' % strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(tx)))
+                    logging.exception('Queue is Full: we cant put %s' % strongfellowbtc.hex.little_endian_hex(ds256(tx)))
 
     def consume(q):
         kinesis = k()
@@ -135,6 +135,8 @@ def test_get_records(args = None):
     while True:
         response = kinesis.get_records(ShardIterator=shard_iterator, Limit=1000)
         shard_iterator = response['NextShardIterator']
+        for record in response['Records']:
+            print strongfellowbtc.hex.big_endian_hex(ds256(record['Data'][8:]))
         print response
         time.sleep(1)
 

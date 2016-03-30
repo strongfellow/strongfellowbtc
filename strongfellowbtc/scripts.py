@@ -131,7 +131,7 @@ def stash_incoming_transactions(args=None):
                 try:
                     q.put_nowait((ms, tx))
                 except Queue.Full:
-                    logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(strongfellowbtc.hash.double_sha256(tx)))
+                    logging.exception('we cant put %s' % strongfellowbtc.hex.big_endian_hex(ds256(tx)))
 
     def consume(q):
         client = boto3.client('dynamodb')
@@ -159,7 +159,7 @@ def stash_incoming_transactions(args=None):
                 while len(items) < n and len(items) < 25:
                     ms, tx = q.get_nowait()
                     item = {
-                        'txhash': { 'B': strongfellowbtc.hash.double_sha256(tx) },
+                        'txhash': { 'B': ds256(tx) },
                         'created': { 'N': str(ms) },
                         'tx': { 'B': tx }
                     }
