@@ -21,6 +21,13 @@ def test_block_parser():
         t = block.transactions[0]
         eq_(154, t.metadata.size)
         eq_('d4201e45c3a85ad04fcd25b194fd60c2c7131061d5f26c5129d043bbfbf98e96', t.metadata.hash)
+        out = t.outputs[0]
+        eq_(2560296660, out.value)
+
+        t = block.transactions[-1]
+        eq_(1997, t.metadata.size)
+        eq_('89e5a3ac4471db1a0739d0d4021b508636cb2e133d053ef28bb0f50dffe37948', t.metadata.hash)
+        eq_('4830450221009aee978f8486611e4648dfa86029259bed1318a324bb10cb1768e31dc2c647a502201cfc9395b7d6d0e815a11727f8a74f0d90e71d3eaecbd9d60bbef8f1eb4474a6012102cfe22d0c7657cffb5f86d2b81071d710e48ab7a4694bef38c56bc80758137c6d', t.inputs[0].script)
 
         eq_(998225, block.metadata.size)
         eq_('c27ed31a1fab49896fc876efacc226d4bd00d82cdb6d023bbdf8eb80b8958ddf', protocol.merkle_root(block))

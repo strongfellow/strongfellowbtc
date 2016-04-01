@@ -5,7 +5,7 @@ from hashlib import sha256
 from io import BytesIO
 import logging
 
-from strongfellowbtc.hex import big_endian_hex
+from strongfellowbtc.hex import big_endian_hex, little_endian_hex
 
 def ds256(bs):
     '''doubld sha; see https://en.bitcoin.it/wiki/Protocol_documentation#Hashes'''
@@ -49,7 +49,7 @@ class BlockParser:
 
     def parse_script(self):
         n = self.parse_varint()
-        return big_endian_hex(self.read(n))
+        return little_endian_hex(self.read(n))
 
     def parse_varint(self):
         b = self.parse_uint(1)
