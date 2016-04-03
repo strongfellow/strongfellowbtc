@@ -32,4 +32,3 @@ def test_block_parser():
         eq_(998225, block.metadata.size)
         eq_('c27ed31a1fab49896fc876efacc226d4bd00d82cdb6d023bbdf8eb80b8958ddf', protocol.merkle_root(block))
         eq_('00000000000000000075d42472dce83bac73268f4cf6643d9e20a534c32e7bbe', block.metadata.hash)
-
