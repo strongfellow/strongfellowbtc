@@ -16,8 +16,8 @@ from strongfellowbtc.protocol import ds256
 import strongfellowbtc.zmq
 from strongfellowbtc.logging import configure_logging
 
-def k():
-    return boto3.client('kinesis')
+def k(region):
+    return boto3.client('kinesis', region_name=region)
 
 def _stream_name(region, env, host):
     return 'strongfellow-{region}-{env}-{host}'.format(region=region, env=env, host=host)
@@ -42,7 +42,7 @@ def create_stream(args=None):
     parser.add_argument('--shard-count', default='1', type=int)
     params = parser.parse_args(args)
 
-    kinesis = k()
+    kinesis = k(params.region)
 
     stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
     shard_count = params.shard_count
@@ -81,7 +81,7 @@ def stream_incoming_transactions(args=None):
                     logging.exception('Queue is Full: we cant put %s' % strongfellowbtc.hex.little_endian_hex(ds256(tx)))
 
     def consume(q):
-        kinesis = k()
+        kinesis = k(region=args.region)
         stream_name = _stream_name(region=args.region, env=args.env, host=args.host)
         while True:
             if q.empty():
@@ -128,7 +128,7 @@ def test_get_records(args = None):
     parser.add_argument('--host', required=True)
     params = parser.parse_args(args)
     
-    kinesis = k()
+    kinesis = k(region=params.region)
     stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
     shard_id = 'shardId-000000000000'
     shard_iterator = kinesis.get_shard_iterator(StreamName=stream_name, ShardId=shard_id, ShardIteratorType="LATEST")['ShardIterator']
