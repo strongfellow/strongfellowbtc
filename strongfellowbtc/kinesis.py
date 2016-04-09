@@ -61,7 +61,7 @@ def stream_incoming_transactions(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--maxsize', type=int, default='300')
-    parser.add_argument('--txport', type=int, default='28332')
+    parser.add_argument('--txport', type=int, default='28334')
     parser.add_argument('--region', required=True)
     parser.add_argument('--env', required=True)
     parser.add_argument('--host', required=True)
