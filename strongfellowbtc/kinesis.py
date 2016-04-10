@@ -21,8 +21,8 @@ from strongfellowbtc.logging import configure_logging
 def k(region):
     return boto3.client('kinesis', region_name=region)
 
-def _stream_name(region, env, host):
-    return 'strongfellow-tx-{region}-{env}'.format(region=region, env=env, host=host)
+def _stream_name(region, env):
+    return 'strongfellow-tx-{region}-{env}'.format(region=region, env=env)
 
 def little_endian_long(n):
     bs = bytearray(8)
@@ -46,7 +46,7 @@ def create_stream(args=None):
 
     kinesis = k(params.region)
 
-    stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
+    stream_name = _stream_name(region=params.region, env=params.env)
     shard_count = params.shard_count
 
     logging.info('creating stream %s with shard count %d', stream_name, shard_count)
@@ -85,7 +85,7 @@ def stream_incoming_transactions(args=None):
 
     def consume(q):
         kinesis = k(region=args.region)
-        stream_name = _stream_name(region=args.region, env=args.env, host=args.host)
+        stream_name = _stream_name(region=args.region, env=args.env)
         while True:
             if q.empty():
                time.sleep(1)
@@ -139,14 +139,15 @@ def test_get_records(args = None):
     params = parser.parse_args(args)
     
     kinesis = k(region=params.region)
-    stream_name = _stream_name(region=params.region, env=params.env, host=params.host)
+    stream_name = _stream_name(region=params.region, env=params.env)
     shard_id = 'shardId-000000000000'
     shard_iterator = kinesis.get_shard_iterator(StreamName=stream_name, ShardId=shard_id, ShardIteratorType="LATEST")['ShardIterator']
     while True:
         response = kinesis.get_records(ShardIterator=shard_iterator, Limit=1000)
         shard_iterator = response['NextShardIterator']
         for record in response['Records']:
-            print strongfellowbtc.hex.big_endian_hex(ds256(record['Data'][8:]))
+            d = msgpack.unpackb(record['Data'])
+            print strongfellowbtc.hex.big_endian_hex(ds256(d['x']))
         print response
         time.sleep(1)
 
