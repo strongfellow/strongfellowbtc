@@ -3,13 +3,15 @@ from __future__ import absolute_import
 
 import argparse
 from datetime import datetime
-import boto3
 import logging
 import Queue
 import sys
 import time
 import threading
 import uuid
+
+import boto3
+import msgpack
 
 import strongfellowbtc.hex
 from strongfellowbtc.protocol import ds256
@@ -20,7 +22,7 @@ def k(region):
     return boto3.client('kinesis', region_name=region)
 
 def _stream_name(region, env, host):
-    return 'strongfellow-{region}-{env}-{host}'.format(region=region, env=env, host=host)
+    return 'strongfellow-{region}-{env}'.format(region=region, env=env, host=host)
 
 def little_endian_long(n):
     bs = bytearray(8)
@@ -65,6 +67,7 @@ def stream_incoming_transactions(args=None):
     parser.add_argument('--region', required=True)
     parser.add_argument('--env', required=True)
     parser.add_argument('--host', required=True)
+    parser.add_argument('--network', default='main', choices=['main', 'testnet', 'segwit'])
     args = parser.parse_args(args)
 
     q = Queue.Queue(maxsize=args.maxsize)
@@ -93,9 +96,16 @@ def stream_incoming_transactions(args=None):
                 logging.info('%d transactions equeued', n)
                 while len(records) < n:
                     ms, tx = q.get_nowait()
+                    data = msgpack.packb({
+                        't': ms, # milliseconds since epoch
+                        'x': tx, # the transaction
+                        'h': args.host, # short name of the host
+                        'n': args.network # main, testnet, segnet, etc.
+                    })
+                    partition_key = strongfellowbtc.hex.big_endian_hex(ds256(tx))
                     record = {
-                        'Data': little_endian_long(ms) + tx,
-                        'PartitionKey': str(uuid.uuid4())
+                        'Data': data,
+                        'PartitionKey': partition_key
                     }
                     records.append(record)
                 try:
