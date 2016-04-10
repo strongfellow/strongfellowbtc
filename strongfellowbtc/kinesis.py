@@ -22,7 +22,7 @@ def k(region):
     return boto3.client('kinesis', region_name=region)
 
 def _stream_name(region, env, host):
-    return 'strongfellow-{region}-{env}'.format(region=region, env=env, host=host)
+    return 'strongfellow-tx-{region}-{env}'.format(region=region, env=env, host=host)
 
 def little_endian_long(n):
     bs = bytearray(8)
