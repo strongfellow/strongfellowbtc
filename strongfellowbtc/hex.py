@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 from binascii import hexlify as hexlify
 
 def switch_endian(hex_string):

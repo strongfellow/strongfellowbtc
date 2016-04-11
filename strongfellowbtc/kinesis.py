@@ -13,6 +13,7 @@ import uuid
 import boto3
 import msgpack
 
+import strongfellowbtc.constants as constants
 import strongfellowbtc.hex
 from strongfellowbtc.protocol import ds256
 import strongfellowbtc.zmq
@@ -63,11 +64,11 @@ def stream_incoming_transactions(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--maxsize', type=int, default='300')
-    parser.add_argument('--txport', type=int, default='28334')
+    parser.add_argument('--txport', type=int, default=str(constants.RAW_TX_PORT))
     parser.add_argument('--region', required=True)
     parser.add_argument('--env', required=True)
     parser.add_argument('--host', required=True)
-    parser.add_argument('--network', default='main', choices=['main', 'testnet', 'segwit'])
+    parser.add_argument('--network', default='main', choices=constants.NETWORKS.keys())
     args = parser.parse_args(args)
 
     q = Queue.Queue(maxsize=args.maxsize)

@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 import argparse
 import ConfigParser
 import logging
@@ -8,6 +10,7 @@ import twitter
 
 import strongfellowbtc.zmq
 import strongfellowbtc.hex
+from strongfellowbtc.logging import configure_logging
 from strongfellowbtc.protocol import ds256
 
 from datetime import datetime
@@ -37,7 +40,7 @@ TOPIC = 'rawblock'
 TEMPLATE = 'Block Mined, %s: http://strongfellow.com/blocks/%s #bitcoin'
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    configure_logging()
     logging.info('BEGIN')
     t = get_twitter()
     with strongfellowbtc.zmq.socket(port=28332, topic=TOPIC) as socket:
