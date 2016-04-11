@@ -2,11 +2,11 @@
 from __future__ import absolute_import
 
 import argparse
-import botocore
 import hashlib
 import sys
 import logging
 
+import botocore
 import boto3
 
 import strongfellowbtc.constants as constants
@@ -27,7 +27,7 @@ def _args(args=None):
     return parser.parse_args(args)
 
 def _block_putter(network_name, region):
-    bucket = 'blocks-{region}.strongfellow.com'.format(region)
+    bucket = 'blocks-{region}.strongfellow.com'.format(region=region)
     return BlockPutter(bucket=bucket, prefix=network_name)
 
 class BlockPutter:
@@ -84,7 +84,7 @@ def main(args=None):
     configure_logging()
     args = _args(args)
     putter = _block_putter(network_name=args.network, region=args.region)
-    expected_magic = constants.NETWORKS[args.network].magic
+    expected_magic = constants.NETWORKS[args.network].magic.decode('hex')
     logging.info('BEGIN')
     for (magic, block, h) in block_io.generate_blocks(sys.stdin):
         if magic != expected_magic:
