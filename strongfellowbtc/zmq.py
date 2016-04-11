@@ -1,6 +1,8 @@
 
 from __future__ import absolute_import
 
+import zmq
+
 class socket():
     def __init__(self, port, topic):
         self._context = zmq.Context()
