@@ -28,10 +28,10 @@ def _args(args=None):
 
 def _block_putter(network_name, region):
     bucket = 'blocks-{region}.strongfellow.com'.format(region=region)
-    return BlockPutter(bucket=bucket, prefix=network_name)
+    return BlockPutter(region=region, bucket=bucket, prefix=network_name)
 
 class BlockPutter:
-    def __init__(self, bucket, prefix):
+    def __init__(self, region, bucket, prefix):
         self._bucket = bucket
 
         while prefix.endswith('/'):
@@ -41,7 +41,7 @@ class BlockPutter:
 
         self._prefix = prefix
         
-        self._s3 = boto3.client('s3')
+        self._s3 = boto3.client('s3', region_name=region)
         self._counters = {
             'N': 0,
             'HIT': 0,
