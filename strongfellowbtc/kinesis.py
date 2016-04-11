@@ -148,6 +148,8 @@ def test_get_records(args = None):
         shard_iterator = response['NextShardIterator']
         for record in response['Records']:
             d = msgpack.unpackb(record['Data'])
+            for key in d:
+                print 'key: %s' % key
             print strongfellowbtc.hex.big_endian_hex(ds256(d['x']))
         print response
         time.sleep(1)
