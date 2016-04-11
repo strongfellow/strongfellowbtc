@@ -55,7 +55,7 @@ class BlockPutter:
         md5 = strongfellowbtc.hex.little_endian_hex(hashlib.md5(block).digest())
         block_hash = strongfellowbtc.hex.big_endian_hex(ds256(block[:80]))
         key = block_hash if self._prefix == '' else self._prefix + '/' + block_hash
-        logging.info('begin putting %s', block_hash)
+        logging.info('begin putting %s', key)
 
         try:
             response = self._s3.head_object(Bucket=self._bucket, Key=key, IfMatch=md5)
