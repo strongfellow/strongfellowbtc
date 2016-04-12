@@ -63,8 +63,8 @@ class BlockPutter:
             self._counters['HIT'] += 1
         except botocore.exceptions.ClientError as e:
             error_code = int(e.response['Error']['Code'])
-            if error_code == 404 or error_code == 412:
-                if error_code == 404:
+            if error_code == 403 or error_code == 404 or error_code == 412:
+                if error_code == 403 or error_code == 404:
                     self._counters['MISS_NOT_FOUND'] += 1
                     logging.info('not found')
                 if error_code == 412:
