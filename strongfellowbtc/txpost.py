@@ -12,9 +12,11 @@ def post_incoming_transactions(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', required=True)
     parser.add_argument('--network', required=True)
+    parser.add_argument('--txport', type=int, default=str(constants.RAW_TX_PORT))
+
     params = parser.parse_args(args)
     
-    with strongfellowbtc.zmq.socket(port=args.txport, topic='rawtx') as socket:
+    with strongfellowbtc.zmq.socket(port=params.txport, topic='rawtx') as socket:
         while True:
             topic, tx = socket.recv_multipart()
             delta = datetime.now() - datetime(1970, 1, 1)
