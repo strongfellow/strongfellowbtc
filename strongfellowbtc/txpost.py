@@ -4,6 +4,8 @@ import msgpack
 import requests
 import sys
 
+from datetime import datetime
+
 import strongfellowbtc.zmq
 import strongfellowbtc.constants as constants
 
