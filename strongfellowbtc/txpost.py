@@ -2,6 +2,7 @@
 import argparse
 import msgpack
 import requests
+import sys
 
 def post_incoming_transactions(args=None):
     if args is None:
