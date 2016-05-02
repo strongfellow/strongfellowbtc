@@ -4,6 +4,8 @@ import msgpack
 import requests
 import sys
 
+import strongfellowbtc.zmq
+
 def post_incoming_transactions(args=None):
     if args is None:
         args = sys.argv[1:]
