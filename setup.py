@@ -15,7 +15,8 @@ config = {
             'create-kinesis-stream=strongfellowbtc.kinesis:create_stream',
             'put-blocks=strongfellowbtc.block_putter:main',
             'stash-incoming-blocks=strongfellowbtc.block_putter:stash_incoming_blocks',
-            'stream-incoming-transactions=strongfellowbtc.kinesis:stream_incoming_transactions'
+            'stream-incoming-transactions=strongfellowbtc.kinesis:stream_incoming_transactions',
+            'post-incoming-transactions=strongfellowbtc.txpost:post_incoming_transactions'
         ]
     }
 }
