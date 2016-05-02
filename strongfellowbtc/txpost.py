@@ -5,6 +5,7 @@ import requests
 import sys
 
 import strongfellowbtc.zmq
+import strongfellowbtc.constants as constants
 
 def post_incoming_transactions(args=None):
     if args is None:
