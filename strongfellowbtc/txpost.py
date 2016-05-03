@@ -13,6 +13,7 @@ from strongfellowbtc.protocol import ds256
 from strongfellowbtc.hex import big_endian_hex
 
 def post_incoming_transactions(args=None):
+    configure_logging()
     if args is None:
         args = sys.argv[1:]
     parser = argparse.ArgumentParser()
