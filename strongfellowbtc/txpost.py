@@ -6,6 +6,7 @@ import logging
 import requests
 import sys
 
+import strongfellowbtc.constants as constants
 import strongfellowbtc.zmq
 from strongfellowbtc.logging import configure_logging
 from strongfellowbtc.protocol import ds256
