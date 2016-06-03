@@ -14,7 +14,7 @@ def _read_exactly(input, n):
 
 def _little_endian(input, n):
     bs = _read_exactly(input, n)
-    return sum(ord(b) << (i * 8) for i, b in enumerate(bs)) 
+    return sum(b << (i * 8) for i, b in enumerate(bs))
 
 def _block_hash(bs):
     return ds256(bs[:80])
