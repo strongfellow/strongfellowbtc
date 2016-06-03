@@ -16,7 +16,8 @@ config = {
             'put-blocks=strongfellowbtc.block_putter:main',
             'stash-incoming-blocks=strongfellowbtc.block_putter:stash_incoming_blocks',
             'stream-incoming-transactions=strongfellowbtc.kinesis:stream_incoming_transactions',
-            'post-incoming-transactions=strongfellowbtc.txpost:post_incoming_transactions'
+            'post-incoming-transactions=strongfellowbtc.txpost:post_incoming_transactions',
+            'post-blocks-from-blocks-dir=strongfellowbtc.block_poster:post_blocks_from_blocks_dir'
         ]
     }
 }

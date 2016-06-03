@@ -40,7 +40,7 @@ class BlockPutter:
             prefix = prefix[1:]
 
         self._prefix = prefix
-        
+
         self._s3 = boto3.client('s3', region_name=region)
         self._counters = {
             'N': 0,
