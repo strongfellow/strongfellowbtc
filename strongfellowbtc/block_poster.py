@@ -85,7 +85,7 @@ def post_blocks_from_blocks_dir(args=None):
                   else:
                     logging.error('non-200 response for block %s -- HTTP %d', block_hash, status)
                 except requests.exceptions.RequestException as e:
-                  logging.exception('problem posting %s' block_hash)
+                  logging.exception('problem posting %s', block_hash)
                 if not retry:
                   break
                 elif backoff < 60:
