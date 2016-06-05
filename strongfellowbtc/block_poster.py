@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import requests
+import requests.exceptions
 import sys
 import time
 
@@ -15,6 +16,7 @@ from strongfellowbtc.logging import configure_logging
 import strongfellowbtc.block_io as block_io
 import strongfellowbtc.constants as constants
 import strongfellowbtc.hex
+
 
 def md5(fname):
     hash_md5 = hashlib.md5()
@@ -49,8 +51,9 @@ def post_blocks_from_blocks_dir(args=None):
   expected_magic = binascii.unhexlify(constants.NETWORKS[args.network].magic)
 
   while True:
+    total_success_count = 0
     logging.info('begin iteration')
-    for f in listdir(blocks_dir):
+    for f in sorted(listdir(blocks_dir)):
       if isfile(join(blocks_dir, f)) and f.startswith('blk') and f.endswith('.dat'):
         logging.info('begin processing %s', f)
         md = md5(join(blocks_dir, f))
@@ -66,31 +69,44 @@ def post_blocks_from_blocks_dir(args=None):
               logging.debug('posting %s', block_hash)
               if magic != expected_magic:
                 raise Exception('unexpected magic: %s; expected %s' % (strongfellowbtc.hex.little_endian_hex(magic), strongfellowbtc.hex.little_endian_hex(expected_magic)))
+              if success_count % 1000 == 0:
+                  logging.info('so far in file %s with %d successes', f, success_count)
 
               backoff = 1
               while True:
-                response = s.post(url, data=block,
-                                headers={ 'Content-Type': 'strongfellow/block'})
-                status = response.status_code
-                if status == 200:
-                  success_count += 1
-                  if success_count % 1000 == 0:
-                    logging.info('so far in file %s with %d successes', f, success_count)
+                retry = True
+                try:
+                  response = s.post(url, data=block,
+                                    headers={ 'Content-Type': 'strongfellow/block'})
+                  status = response.status_code
+                  if status == 200:
+                    success_count += 1
+                    retry = False
+                  else:
+                    logging.error('non-200 response for block %s -- HTTP %d', block_hash, status)
+                except requests.exceptions.RequestException as e:
+                  logging.exception('problem posting %s' block_hash)
+                if not retry:
                   break
                 elif backoff < 60:
+                  logging.info('backing off for %d seconds', backoff)
                   time.sleep(backoff)
                   backoff *= 2
                 else:
                   logging.info('failed to post %s', block_hash)
                   logging.info('we backed off too many times; failing')
-                  sys.exit(1)
-                  break
-              logging.debug('finished posting %s', block_hash)
+                  raise
           logging.info('finished file %s with %d successes', f, success_count)
+          total_success_count += success_count
+          logging.info('total success count: %d', total_success_count)
           cache[f] = md
           with open('cache.json', 'w') as output:
             json.dump(cache, output)
         logging.info('finished processing %s', f)
+    delay_seconds = 600 if total_success_count == 0 else 10
+    logging.info('and now, we sleep for %d seconds', delay_seconds)
+    time.sleep(delay_seconds)
+    logging.info('finished sleeping')
     logging.info('finished iteration')
 
 if __name__ == '__main__':
