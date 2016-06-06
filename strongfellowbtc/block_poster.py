@@ -42,8 +42,9 @@ def post_blocks_from_blocks_dir(args=None):
   blocks_dir = args.blocks_dir
 
   cache = {}
+  cache_file = '/tmp/cache.json'
   try:
-    with open('cache.json') as input:
+    with open(cache_file) as input:
       cache = json.load(input)
   except IOError:
     cache = {}
@@ -100,7 +101,7 @@ def post_blocks_from_blocks_dir(args=None):
           total_success_count += success_count
           logging.info('total success count: %d', total_success_count)
           cache[f] = md
-          with open('cache.json', 'w') as output:
+          with open(cache_file, 'w') as output:
             json.dump(cache, output)
         logging.info('finished processing %s', f)
     delay_seconds = 600 if total_success_count == 0 else 10
